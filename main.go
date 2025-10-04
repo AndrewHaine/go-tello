@@ -8,21 +8,27 @@ import (
 	"strings"
 )
 
-const droneAddress = "192.168.10.1:8889"
+const (
+	controlAddr = "192.168.10.1"
+	controlPort = "8889"
+	telemetryAddr = "0.0.0.0"
+	telemetryPort = "8890"
+	videoPort = "11111"
+)
 
 func main() {
-	// Set up a UDP client to send/recieve commands from the drone
-	udpAddr, err := net.ResolveUDPAddr("udp", droneAddress)
+	controlLocation := fmt.Sprintf("%s:%s", controlAddr, controlPort)
+	udpAddr, err := net.ResolveUDPAddr("udp", controlLocation)
 
 	if err != nil {
-		fmt.Printf("Error resolving drone UDP address: %s", err)
+		fmt.Printf("Could not resolve drone address: %s", err)
 		os.Exit(1)
 	}
 
 	conn, err := net.DialUDP("udp", nil, udpAddr)
 
 	if err != nil {
-		fmt.Printf("Error connecting to drone: %s", err)
+		fmt.Printf("Could not connect to drone: %s", err)
 		os.Exit(1)
 	}
 
@@ -33,16 +39,18 @@ func main() {
 
 	fmt.Println("Ready for commands!")
 
-	go printMessagesFromDrone(conn)
+	messageChan := receiveMessagesFromTello(conn)
+
+	go printMessages(messageChan)
 
 	for {
 		reader := bufio.NewReader(os.Stdin)
 		fmt.Print(">> ")
 		text, _ := reader.ReadString('\n')
 
-		newText := strings.Split(text, "\n")
+		command := strings.TrimRight(text, "\n")
 		
-		conn.Write([]byte(newText[0]))
+		conn.Write([]byte(command))
 
 		if strings.TrimSpace(string(text)) == "STOP" {
 			fmt.Println("Stopping")
@@ -51,12 +59,23 @@ func main() {
 	}
 }
 
-func printMessagesFromDrone(conn *net.UDPConn) {
+func receiveMessagesFromTello(conn *net.UDPConn) chan []byte { 
+	telloMessageChan := make(chan []byte)
+
+	go func() {
+		for {
+			message := make([]byte, 256)
+			conn.ReadFromUDP(message)
+			telloMessageChan <- message
+		}
+	}()
+
+	return telloMessageChan
+}
+
+func printMessages(messageChan chan []byte) {
 	for {
-		message := make([]byte, 256)
-
-		conn.ReadFromUDP(message)
-
-		fmt.Printf("🚁 Message from drone: %s\n>> ", message)
-	}
+			message := <-messageChan
+			fmt.Printf("🚁 Message from Tello: %s\n>>", message)
+		}
 }
