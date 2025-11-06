@@ -1,3 +1,3 @@
-# Go Tello Controller
+# Go Tello 🚁
 
-Controller for Tello drone written in Go.
+Client for controlling and receiving data from a DJI Tello Drone.
