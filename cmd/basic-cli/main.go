@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"slices"
 	"strings"
 
 	"github.com/andrewhaine/go-tello/tello"
@@ -24,8 +25,6 @@ func main() {
 
   fmt.Println("Entering SDK mode...")
 	drone.SendRawCmdString([]byte("command"))
-
-  go printCmdMessages(&drone)
 	
   fmt.Println("Ready for commands!")
   sendCommandsFromStdin(&drone)
@@ -39,18 +38,22 @@ func sendCommandsFromStdin(drone *tello.Drone) {
     text, _ := reader.ReadString('\n')
     cmdString := strings.TrimRight(text, "\n")
 
-    drone.SendRawCmdString([]byte(cmdString))
-
-    if strings.TrimSpace(string(text)) == "STOP" {
-			fmt.Println("Stopping")
+    if strings.TrimSpace(string(text)) == "emergency" {
+      fmt.Println("Emergency stop!")
+      drone.SendRawCmdString([]byte(cmdString))
+      drone.CloseConnection()
 			return
 		}
-  }
-}
 
-func printCmdMessages(drone *tello.Drone) {
-	for {
-    message := <-drone.CmdResponseChan
-    fmt.Printf("🚁 Message from Tello drone: %s\n>>", message)
+    if strings.TrimSpace(string(text)) == "M" {
+      messageStrings := []string{}
+      for _, droneMsg := range drone.GetMessages() {
+        messageStrings = append(messageStrings, droneMsg.Message)
+      }
+      fmt.Println(slices.Concat(messageStrings))
+      continue
+    }
+
+    drone.SendRawCmdString([]byte(cmdString))
   }
 }
