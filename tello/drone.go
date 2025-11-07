@@ -24,7 +24,6 @@ type Drone struct {
   cmdResponseChan chan string
   telemetryConn *net.UDPConn
   telemetryConnState ConnectionState
-  // telemetryChan chan State
 }
 
 func NewDrone() Drone {

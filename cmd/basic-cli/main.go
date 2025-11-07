@@ -27,6 +27,9 @@ func main() {
 	drone.SendRawCmdString([]byte("command"))
 	
   fmt.Println("Ready for commands!")
+
+  go printTelemetry(&drone)
+
   sendCommandsFromStdin(&drone)
 }
 
@@ -55,5 +58,31 @@ func sendCommandsFromStdin(drone *tello.Drone) {
     }
 
     drone.SendRawCmdString([]byte(cmdString))
+  }
+}
+
+func printTelemetry(drone *tello.Drone) {
+  teleChan, err := drone.StreamTelemetry()
+
+  if err != nil {
+    fmt.Println("Could not stream telemetry: " + err.Error())
+    return
+  }
+
+  for teleVal := range teleChan {
+    s := fmt.Sprintf(
+      "Tele: Battery: %s%%, Pitch: %s°, Yaw: %s°, Roll: %s°, Temp: %s°C - %s°C, Baro: %s, Time: %s, Altitude: %s, Height: %s",
+      teleVal.Bat,
+      teleVal.Pitch,
+      teleVal.Yaw,
+      teleVal.Roll,
+      teleVal.Temp.Low,
+      teleVal.Temp.High,
+      teleVal.Baro,
+      teleVal.Time,
+      teleVal.Altitude,
+      teleVal.Height,
+    )
+    fmt.Println(s)
   }
 }
