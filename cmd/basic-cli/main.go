@@ -7,7 +7,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/andrewhaine/go-tello/tello"
+	"github.com/andrewhaine/go-tello/pkg/tello"
 )
 
 // This is where we'll re-create the basic CLI we had in v1
@@ -24,7 +24,7 @@ func main() {
   defer drone.CloseConnection()
 
   fmt.Println("Entering SDK mode...")
-	drone.SendRawCmdString([]byte("command"))
+	drone.SendRawCmdString("command")
 	
   fmt.Println("Ready for commands!")
 
@@ -43,7 +43,7 @@ func sendCommandsFromStdin(drone *tello.Drone) {
 
     if strings.TrimSpace(string(text)) == "emergency" {
       fmt.Println("Emergency stop!")
-      drone.SendRawCmdString([]byte(cmdString))
+      drone.SendRawCmdString(cmdString)
       drone.CloseConnection()
 			return
 		}
@@ -57,7 +57,7 @@ func sendCommandsFromStdin(drone *tello.Drone) {
       continue
     }
 
-    drone.SendRawCmdString([]byte(cmdString))
+    drone.SendRawCmdString(cmdString)
   }
 }
 

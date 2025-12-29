@@ -32,6 +32,6 @@ func NewDrone() Drone {
   }
 }
 
-func (drone *Drone) SendRawCmdString(cmdString []byte) {
-  drone.cmdConn.Write(cmdString);
+func (drone *Drone) SendRawCmdString(cmdString string) {
+  drone.cmdConn.Write([]byte(cmdString));
 }
