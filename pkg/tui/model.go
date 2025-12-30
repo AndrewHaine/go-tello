@@ -24,6 +24,7 @@ type TelloTui struct {
   activeScreen Screen
   commandInput textinput.Model
   vitals VitalsData
+  vitalsChan chan Vitals
 }
 
 func NewModel() TelloTui {
@@ -42,6 +43,21 @@ func NewModel() TelloTui {
   }
 }
 
+func (tt *TelloTui) SetVitalsChan(vitalsChan chan Vitals) {
+  tt.vitalsChan = vitalsChan
+}
+
+type VitalsMsg struct {
+  Vitals Vitals
+}
+
+func ListenForTelemetry(tt TelloTui) tea.Cmd {
+  return func() tea.Msg {
+    vitals := <- tt.vitalsChan
+    return VitalsMsg{Vitals: vitals}
+  }
+}
+
 func (tt TelloTui) Init() tea.Cmd {
-  return nil
+  return tea.Batch(tea.EnterAltScreen, ListenForTelemetry(tt))
 }

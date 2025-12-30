@@ -1,6 +1,8 @@
 package tui
 
 import (
+	"time"
+
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -44,6 +46,10 @@ func (tt TelloTui) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
           return updateCommandScreenKeyMsg(tt, msg)
       }
     
+    case VitalsMsg:
+      tt.vitals = VitalsData{ data: msg.Vitals, lastRec: time.Now() }
+      return tt, ListenForTelemetry(tt)
+
     case tea.WindowSizeMsg:
       tt.dimensions.w = msg.Width
       tt.dimensions.h = msg.Height

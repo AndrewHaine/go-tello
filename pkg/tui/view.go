@@ -101,7 +101,7 @@ func renderVitals(tt TelloTui) string {
   flightCtrlRows := [][]string{
     {boldNormalTextPairString("bat ", vitals.bat, false), boldNormalTextPairString("pitch ", vitals.pitch, false)},
     {boldNormalTextPairString("temp ", vitals.temp, false), boldNormalTextPairString("roll ", vitals.roll, false)},
-    {boldNormalTextPairString("time ", vitals.time, false), boldNormalTextPairString("yaw ", vitals.yaw, false)},
+    {boldNormalTextPairString("height ", vitals.height, false), boldNormalTextPairString("yaw ", vitals.yaw, false)},
 
   }
 

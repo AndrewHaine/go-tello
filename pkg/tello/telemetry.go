@@ -82,7 +82,7 @@ func telemetryFromBuff(buff []byte) Telemetry {
     Roll: valueMap["roll"],
     Yaw: valueMap["yaw"],
     Altitude: valueMap["tof"],
-    Height: valueMap["height"],
+    Height: valueMap["h"],
     Bat: valueMap["bat"],
     Baro: valueMap["baro"],
     Time: valueMap["time"],
