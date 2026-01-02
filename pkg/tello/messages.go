@@ -1,23 +1,36 @@
 package tello
 
-import "time"
+import (
+	"errors"
+	"log"
+	"time"
+)
 
 type Message struct {
   Time time.Time
   Message string
 }
 
-func (drone *Drone) startCmdMessageLogger() {
-  for cmdMessage := range drone.cmdResponseChan  {
-    drone.cmdMessagesMu.Lock()
-    logMsg := Message{Time: time.Now(), Message: cmdMessage}
-    drone.cmdMessages = append(drone.cmdMessages, logMsg)
-    drone.cmdMessagesMu.Unlock()
+func (drone *Drone) StreamMessages() (<-chan Message, error) {
+  if !drone.cmdConnState.connected {
+    return nil, errors.New("Command connection not established")
   }
-}
 
-func (drone *Drone) GetMessages() []Message {
-  drone.cmdMessagesMu.Lock()
-  defer drone.cmdMessagesMu.Unlock()
-  return drone.cmdMessages
+  msgChan := make(chan Message)
+
+  go func() {
+    for {
+      msgBuff := make([]byte, 1024)
+      n, err := drone.cmdConn.Read(msgBuff)
+
+      if err != nil {
+        log.Println("Error reading from command connection ", err.Error())
+      }
+
+      msg := Message{Time: time.Now(), Message: string(msgBuff[:n])}
+      msgChan <- msg
+    }
+  }()
+
+  return msgChan, nil
 }

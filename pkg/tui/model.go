@@ -23,8 +23,11 @@ type TelloTui struct {
   dimensions Dimensions
   activeScreen Screen
   commandInput textinput.Model
+  cmdChan chan<- string
+  logMsgs []LogMessage
+  logMsgChan <-chan LogMessage
   vitals VitalsData
-  vitalsChan chan Vitals
+  vitalsChan <-chan Vitals
 }
 
 func NewModel() TelloTui {
@@ -43,6 +46,14 @@ func NewModel() TelloTui {
   }
 }
 
+func (tt *TelloTui) SetCmdChan(cmdChan chan string) {
+  tt.cmdChan = cmdChan
+}
+
+func (tt *TelloTui) SetLogMsgChan(logMsgChan chan LogMessage) {
+  tt.logMsgChan = logMsgChan
+}
+
 func (tt *TelloTui) SetVitalsChan(vitalsChan chan Vitals) {
   tt.vitalsChan = vitalsChan
 }
@@ -51,13 +62,21 @@ type VitalsMsg struct {
   Vitals Vitals
 }
 
-func ListenForTelemetry(tt TelloTui) tea.Cmd {
+type LogMsgMsg struct {
+  LogMsg LogMessage
+}
+
+func ListenForDroneMsg(tt TelloTui) tea.Cmd {
   return func() tea.Msg {
-    vitals := <- tt.vitalsChan
-    return VitalsMsg{Vitals: vitals}
+    select {
+      case vitals := <- tt.vitalsChan:
+        return VitalsMsg{Vitals: vitals}
+      case logMsg := <- tt.logMsgChan:
+        return LogMsgMsg{LogMsg: logMsg}
+    }
   }
 }
 
 func (tt TelloTui) Init() tea.Cmd {
-  return tea.Batch(tea.EnterAltScreen, ListenForTelemetry(tt))
+  return tea.Batch(tea.EnterAltScreen, ListenForDroneMsg(tt))
 }

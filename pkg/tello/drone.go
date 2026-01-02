@@ -2,7 +2,6 @@ package tello
 
 import (
 	"net"
-	"sync"
 )
 
 type Connection struct {
@@ -19,17 +18,14 @@ type ConnectionState struct {
 type Drone struct {
   cmdConn *net.UDPConn
   cmdConnState ConnectionState
-  cmdMessagesMu sync.Mutex
-  cmdMessages []Message
-  cmdResponseChan chan string
+  messagesStreaming bool
+  telemetryStreaming bool
   telemetryConn *net.UDPConn
   telemetryConnState ConnectionState
 }
 
 func NewDrone() Drone {
-  return Drone{
-    cmdResponseChan: make(chan string, 20),
-  }
+  return Drone{}
 }
 
 func (drone *Drone) SendRawCmdString(cmdString string) {

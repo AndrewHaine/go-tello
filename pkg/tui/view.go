@@ -1,6 +1,9 @@
 package tui
 
 import (
+	"slices"
+	"time"
+
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/lipgloss/table"
 )
@@ -10,6 +13,7 @@ var (
   secondaryForegroundColour = lipgloss.Color("#6DA063")
 
   maxWidth = 74
+  maxCaptainsLogMessages = 5
 
   baseStyle = lipgloss.NewStyle().Foreground(foregroundColour)
   
@@ -125,24 +129,52 @@ func renderVitals(tt TelloTui) string {
   return vitalsBlock.Render(vitalsBlockContents)
 }
 
-func renderCaptainsLog() string {
+func renderCaptainsLog(tt TelloTui) string {
   captainsLogBlock := lipgloss.NewStyle().
     Border(lipgloss.NormalBorder()).
     BorderForeground(foregroundColour).
     Padding(0, 1).
     Width((maxWidth / 2) + 2)
 
+  rows := []string{};
   
+  msgs := tt.logMsgs
+  // Explicitly sort the messages by time
+  slices.SortFunc(msgs, func(a, b LogMessage) int {
+    return a.Time.Compare(b.Time)
+  })
+
+  msgCount := len(msgs)
+
+  if msgCount < 1 {
+    rows = append(rows, textStyle.Render("Empty"))
+  } else {
+    slices.Reverse(tt.logMsgs)
+
+    for i, msg := range tt.logMsgs {
+      if i > maxCaptainsLogMessages {
+        break
+      }
+      row := textStyle.Render(msg.Time.Format(time.TimeOnly)) + " " + boldTextStyle.Render(msg.Message)
+      rows = append(rows, row)
+    }
+  }
+
+  slices.Reverse(rows)
+
+  // Pad the remaining rows
+  if (msgCount < maxCaptainsLogMessages) {
+    toPad := maxCaptainsLogMessages - msgCount
+    for range toPad {
+      rows = append(rows, textStyle.Render("   "))
+    }
+  }
+
+  rows = append([]string{boldTextStyle.Render("<captain's log>")}, rows...)
 
   captainsLogContents := lipgloss.JoinVertical(
     lipgloss.Left,
-    boldTextStyle.Render("<captain's log>"),
-    textStyle.Render("Empty"),
-    textStyle.Render("   "),
-    textStyle.Render("   "),
-    textStyle.Render("   "),
-    textStyle.Render("   "),
-    textStyle.Render("   "),
+    rows...
   )
 
   return captainsLogBlock.Render(captainsLogContents)
@@ -186,7 +218,7 @@ func renderMainScreen(tt TelloTui) string {
       lipgloss.JoinVertical(
         lipgloss.Left,
         renderVitals(tt),
-        renderCaptainsLog(),
+        renderCaptainsLog(tt),
       ),
     )
 }

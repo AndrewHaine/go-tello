@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"slices"
 	"strings"
 
 	"github.com/andrewhaine/go-tello/pkg/tello"
@@ -47,15 +46,6 @@ func sendCommandsFromStdin(drone *tello.Drone) {
       drone.CloseConnection()
 			return
 		}
-
-    if strings.TrimSpace(string(text)) == "M" {
-      messageStrings := []string{}
-      for _, droneMsg := range drone.GetMessages() {
-        messageStrings = append(messageStrings, droneMsg.Message)
-      }
-      fmt.Println(slices.Concat(messageStrings))
-      continue
-    }
 
     drone.SendRawCmdString(cmdString)
   }

@@ -89,9 +89,6 @@ func (drone *Drone) Connect(cmdConn Connection, telemetryConn Connection) (err e
   drone.cmdConn = cmdConnection
   drone.telemetryConn = telemetryConnection
 
-  go drone.startCmdResponseListener()
-  go drone.startCmdMessageLogger()
-
   return nil
 }
 
@@ -104,12 +101,4 @@ func (drone *Drone) CloseConnection() {
 
 func (drone *Drone) ConnectDefault() (err error) {
   return drone.Connect(DefaultCmdConnection(), DefaultTelemetryConnection())
-}
-
-func (drone *Drone) startCmdResponseListener() {
-  for {
-    messageBuff := make([]byte, 256)
-    drone.cmdConn.Read(messageBuff)
-    drone.cmdResponseChan <- string(messageBuff)
-  }
 }
