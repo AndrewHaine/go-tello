@@ -86,6 +86,10 @@ func (tt TelloTui) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
       tt.AppendLogMsg(msg.LogMsg)
       return tt, ListenForDroneMsg(tt)
 
+    case CheckConnectionMsg:
+      CheckConnectionFromVitals(&tt)
+      return tt, CheckConnection()
+
     case tea.WindowSizeMsg:
       tt.dimensions.w = msg.Width
       tt.dimensions.h = msg.Height

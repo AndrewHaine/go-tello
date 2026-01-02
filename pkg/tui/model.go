@@ -58,12 +58,20 @@ func (tt *TelloTui) SetVitalsChan(vitalsChan chan Vitals) {
   tt.vitalsChan = vitalsChan
 }
 
+type CheckConnectionMsg time.Time
+
 type VitalsMsg struct {
   Vitals Vitals
 }
 
 type LogMsgMsg struct {
   LogMsg LogMessage
+}
+
+func CheckConnection() tea.Cmd {
+  return tea.Tick(time.Second, func (currTime time.Time) tea.Msg {
+    return CheckConnectionMsg(currTime)
+  })
 }
 
 func ListenForDroneMsg(tt TelloTui) tea.Cmd {
@@ -78,5 +86,5 @@ func ListenForDroneMsg(tt TelloTui) tea.Cmd {
 }
 
 func (tt TelloTui) Init() tea.Cmd {
-  return tea.Batch(tea.EnterAltScreen, ListenForDroneMsg(tt))
+  return tea.Batch(tea.EnterAltScreen, ListenForDroneMsg(tt), CheckConnection())
 }
