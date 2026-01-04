@@ -54,6 +54,7 @@ func main() {
   
   if _, err := p.Run(); err != nil {
     fmt.Printf("Error occurred starting program: %v", err)
+    drone.SendRawCmdString("emergency")
     os.Exit(1)
   }
 }

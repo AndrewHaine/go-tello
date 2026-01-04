@@ -200,6 +200,8 @@ func renderFooter(tt TelloTui) string {
     case SCREEN_MAIN:
       commands = []string{
         boldNormalTextPairString("c", " command", true),
+        textStyle.Render("   "),
+        boldNormalTextPairString("v", " video", true),
       }
   }
   

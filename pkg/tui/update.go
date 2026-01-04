@@ -7,12 +7,17 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+func quit(tt TelloTui) (tea.Model, tea.Cmd) {
+  tt.StopVideo()
+  return tt, tea.Quit
+}
+
 func updateMainScreenKeyMsg (tt TelloTui, msg tea.KeyMsg) (tea.Model, tea.Cmd) {
   log.Println("Key: " + msg.String())
 
   switch msg.String() {
     case "q", "ctrl+c":
-      return tt, tea.Quit
+      return quit(tt)
     case "c":
       tt.activeScreen = SCREEN_COMMAND
       tt.commandInput.Reset()
@@ -39,6 +44,9 @@ func updateMainScreenKeyMsg (tt TelloTui, msg tea.KeyMsg) (tea.Model, tea.Cmd) {
       tt.cmdChan <- "ccw 60"
     case "right":
       tt.cmdChan <- "cw 60"
+    case "v":
+      tt.cmdChan <- "streamon"
+      tt.StartVideo()
     
   }
 
@@ -52,7 +60,7 @@ func updateCommandScreenKeyMsg (tt TelloTui, msg tea.KeyMsg) (tea.Model, tea.Cmd
 
   switch (msg.String()) {
     case "q", "ctrl+c":
-      return tt, tea.Quit
+      return quit(tt)
     case "esc":
       tt.activeScreen = SCREEN_MAIN
       tt.commandInput.Blur()
