@@ -189,6 +189,12 @@ func renderFooter(tt TelloTui) string {
     Inherit(baseStyle)
 
   var commands []string
+
+  videoLabel := "start video"
+
+  if tt.videoStreaming {
+    videoLabel = "stop video"
+  }
   
   switch tt.activeScreen {
     case SCREEN_COMMAND:
@@ -201,7 +207,7 @@ func renderFooter(tt TelloTui) string {
       commands = []string{
         boldNormalTextPairString("c", " command", true),
         textStyle.Render("   "),
-        boldNormalTextPairString("v", " video", true),
+        boldNormalTextPairString("v ", videoLabel, true),
       }
   }
   

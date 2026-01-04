@@ -91,7 +91,3 @@ func ListenForDroneMsg(tt TelloTui) tea.Cmd {
 func (tt TelloTui) Init() tea.Cmd {
   return tea.Batch(tea.EnterAltScreen, ListenForDroneMsg(tt), CheckConnection())
 }
-
-func (tt TelloTui) Cleanup() error {
-  return nil
-}
