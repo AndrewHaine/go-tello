@@ -26,7 +26,7 @@ type TelloTui struct {
   commandInput textinput.Model
   cmdChan chan<- string
   logMsgs []LogMessage
-  logMsgChan <-chan LogMessage
+  logMsgChan chan LogMessage
   vitals VitalsData
   vitalsChan <-chan Vitals
   videoStreaming bool
