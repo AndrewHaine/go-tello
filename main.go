@@ -33,6 +33,11 @@ func main() {
 
 	fmt.Println("Ready for commands!")
 
+	messageBuffer := make([]byte, 128)
+	conn.ReadFromUDP(messageBuffer)
+
+	fmt.Printf("Message recieved from drone: %s", messageBuffer)
+
 	for {
 		reader := bufio.NewReader(os.Stdin)
 		fmt.Print(">> ")
