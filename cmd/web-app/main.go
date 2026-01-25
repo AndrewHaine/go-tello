@@ -6,7 +6,7 @@ import (
 )
 
 const (
-  staticDir = "cmd/web-app/public"
+  staticDir = "cmd/web-app/web/dist"
   port = "8080"
 )
 
