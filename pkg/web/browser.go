@@ -11,7 +11,7 @@ import (
 type Browser struct {
 	Conn *websocket.Conn
 	Hub *Hub
-	Queue chan []byte
+	Queue chan Event
 }
 
 const (
@@ -31,7 +31,9 @@ func (b *Browser) ReceiveCommands() {
 	b.Conn.SetPongHandler(func(string) error { b.Conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
 
 	for {
-		_, msg, err := b.Conn.ReadMessage()
+		var cmdEvent CommandEvent
+		err := b.Conn.ReadJSON(&cmdEvent)
+
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				log.Printf("Error reading from browser: %v", err)
@@ -39,6 +41,11 @@ func (b *Browser) ReceiveCommands() {
 			fmt.Println(err.Error())
 			break
 		}
+
+		if cmdEvent.event == EventTypeCommand {
+			b.Hub.Commands <- cmdEvent.payload
+		}
+
 		b.Hub.Commands <- msg
 	}
 }
@@ -59,7 +66,7 @@ func (b *Browser) SendQueuedMessages() {
 				return
 			}
 
-			b.Conn.WriteMessage(websocket.TextMessage, msg)
+			b.Conn.WriteJSON(msg)
 		case <-ticker.C:
 			b.Conn.WriteMessage(websocket.PingMessage, nil)
 		}

@@ -54,7 +54,7 @@ func serveWs(hub *web.Hub, w http.ResponseWriter, r *http.Request) {
 
 	log.Println("New browser connected!")
 
-	browser := &web.Browser{Hub: hub, Conn: ws, Queue: make(chan []byte, 256)}
+	browser := &web.Browser{Hub: hub, Conn: ws, Queue: make(chan web.Event, 256)}
 	hub.Register <- browser
 
 	go browser.SendQueuedMessages()
@@ -76,6 +76,6 @@ func broadcastTelemetry(drone *tello.Drone, hub *web.Hub) {
 	}
 
 	for telemetry := range telemetryChan {
-		hub.Broadcast <- []byte("Bat: " + telemetry.Bat)
+		hub.Broadcast <- web.EventFromTelemetry(telemetry)
 	}
 }

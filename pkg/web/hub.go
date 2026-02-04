@@ -3,7 +3,7 @@ package web
 type Hub struct {
 	Browsers map[Browser]bool
 
-	Broadcast chan []byte
+	Broadcast chan Event
 
 	Commands chan []byte
 
@@ -15,7 +15,7 @@ type Hub struct {
 func NewHub() Hub {
 	return Hub {
 		Browsers: make(map[Browser]bool),
-		Broadcast: make(chan []byte),
+		Broadcast: make(chan Event),
 		Commands: make(chan []byte),
 		Register: make(chan *Browser),
 		Deregister: make(chan *Browser),
