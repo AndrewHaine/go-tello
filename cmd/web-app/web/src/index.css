@@ -15,6 +15,11 @@
 }
 
 @theme {
-  --font-mono: "Kode Mono Variable", monospace;
-  --font-sixtyfour: "Sixtyfour", monospace;
+  --font-mono: "JetBrains Mono Variable", monospace;
+}
+
+@layer components {
+  .liquid-bg {
+    @apply bg-linear-to-b from-white/40 via-5% via-white/20 to-white/15 backdrop-blur-[1px] border-t border-white/40 border-solid;
+  }
 }
