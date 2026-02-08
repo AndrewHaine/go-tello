@@ -380,15 +380,10 @@
     "@eslint/core" "^0.17.0"
     levn "^0.4.1"
 
-"@fontsource-variable/kode-mono@^5.2.8":
+"@fontsource-variable/jetbrains-mono@^5.2.8":
   version "5.2.8"
-  resolved "https://registry.npmjs.org/@fontsource-variable/kode-mono/-/kode-mono-5.2.8.tgz"
-  integrity sha512-X1O4RAIPyP4Vm8rVoKHirg3amVdE2XvIAQUvDRU17aCzSUz648/9w2KJafH1vK6g0uy7U8PrOCc1I11riXhHwQ==
-
-"@fontsource/sixtyfour@^5.2.8":
-  version "5.2.8"
-  resolved "https://registry.yarnpkg.com/@fontsource/sixtyfour/-/sixtyfour-5.2.8.tgz#4988a61ae70f598ed6efe0ba8d5e794adc2e1ced"
-  integrity sha512-juYTkdgNfCDLKxswGJ8xR2ot6HGaqP314EryjrQqEpqhVBGMB9CoEU/k+i3jMYzvWXxSIOUIWBDH5L8OqhRe4g==
+  resolved "https://registry.yarnpkg.com/@fontsource-variable/jetbrains-mono/-/jetbrains-mono-5.2.8.tgz#73031a6973a09b0590e8877ad13a0312ef711681"
+  integrity sha512-WBA9elru6Jdp5df2mES55wuOO0WIrn3kpXnI4+W2ek5u3ZgLS9XS4gmIlcQhiZOWEKl95meYdvK7xI+ETLCq/Q==
 
 "@humanfs/core@^0.19.1":
   version "0.19.1"
@@ -1003,6 +998,11 @@ csstype@^3.2.2:
   version "3.2.3"
   resolved "https://registry.npmjs.org/csstype/-/csstype-3.2.3.tgz"
   integrity sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==
+
+date-fns@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-4.1.0.tgz#64b3d83fff5aa80438f5b1a633c2e83b8a1c2d14"
+  integrity sha512-Ukq0owbQXxa/U3EGtsdVBkR1w7KOQ5gIBqdH2hkvknzZPYvBxb/aa6E8L7tmjFtkwZBu3UXBbjIgPo/Ez4xaNg==
 
 debug@^4.1.0, debug@^4.3.1, debug@^4.3.2, debug@^4.4.3:
   version "4.4.3"

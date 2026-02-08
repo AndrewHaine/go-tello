@@ -36,6 +36,7 @@ func main() {
 
 	go sendHubCommandsToDrone(&drone, &hub)
 	go broadcastTelemetry(&drone, &hub)
+	go broadcastMessages(&drone, &hub)
 
 	http.Handle("/", http.FileServer(http.Dir("./" + staticDir)))
 	http.HandleFunc("/ws", func (w http.ResponseWriter, r *http.Request) {
@@ -77,5 +78,18 @@ func broadcastTelemetry(drone *tello.Drone, hub *web.Hub) {
 
 	for telemetry := range telemetryChan {
 		hub.Broadcast <- web.EventFromTelemetry(telemetry)
+	}
+}
+
+func broadcastMessages(drone *tello.Drone, hub *web.Hub) {
+	messageChan, err := drone.StreamMessages()
+
+	if err != nil {
+		log.Println("Could not stream messages: " + err.Error())
+		return
+	}
+
+	for message := range messageChan {
+		hub.Broadcast <- web.EventFromTelloMsg(message)
 	}
 }

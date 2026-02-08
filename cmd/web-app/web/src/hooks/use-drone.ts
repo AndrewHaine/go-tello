@@ -1,32 +1,55 @@
-import { useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import useWebSocket from "react-use-websocket";
 
 interface UseDroneCommandsOptions {
   webSocketHost: string;
 }
 
-// interface Telemetry {
-//   battery: number;
-//   pitch: number;
-//   roll: number;
-//   yaw: number;
-//   temp: string;
-//   height: number;
-// }
+type EventType =
+  | "log.created"
+  | "command.requested"
+  | "connection.updated"
+  | "telemetry.updated";
 
-// const BLANK_TELEMETRY: Telemetry = {
-//   battery: 0,
-//   pitch: 0,
-//   roll: 0,
-//   yaw: 0,
-//   temp: "",
-//   height: 0,
-// };
+interface Event {
+  event: EventType;
+  timestamp: string;
+}
 
-// interface Message {
-//   time: Date;
-//   message: string;
-// }
+export interface Telemetry {
+  battery: string;
+  pitch: string;
+  roll: string;
+  yaw: string;
+  temp_high: string;
+  temp_low: string;
+  height: string;
+}
+
+interface TelemetryEvent extends Event {
+  payload: Telemetry;
+}
+
+const isTelemetryEvent = (event: Event): event is TelemetryEvent => {
+  return event.event === "telemetry.updated";
+};
+
+export interface Message {
+  message: string;
+  time: string;
+}
+
+interface MessageEvent extends Event {
+  payload: Message;
+}
+
+const isMessageEvent = (event: Event): event is MessageEvent => {
+  return event.event === "log.created";
+};
+
+interface CommandEvent extends Event {
+  payload: { command: string };
+}
 
 // const DroneStatus = {
 //   ONLINE: "ONLINE",
@@ -36,21 +59,49 @@ interface UseDroneCommandsOptions {
 export default function useDrone(options: UseDroneCommandsOptions) {
   const { webSocketHost } = options;
   // const [droneStatus, setDroneStatus] = useState<DroneStatus>("OFFLINE");
-  // const [telemetry, setTelemetry] = useState(BLANK_TELEMETRY);
-  // const [messages, setMessages] = useState<Array<Message>>([]);
+  const telemetry = useRef<Telemetry | null>(null);
+  const messages = useRef<Array<Message>>([
+    { message: "ok", time: "2022-02-02" },
+  ]);
 
-  const {
-    sendMessage: sendCommand,
-    lastMessage,
-    readyState,
-  } = useWebSocket(webSocketHost);
+  const { sendMessage, lastMessage, readyState } = useWebSocket(webSocketHost);
 
   useEffect(() => {
-    console.log(lastMessage);
+    if (!lastMessage?.data) {
+      return;
+    }
+
+    const lastEvent = JSON.parse(lastMessage?.data) as Event;
+
+    if (isTelemetryEvent(lastEvent)) {
+      telemetry.current = lastEvent.payload;
+      return;
+    }
+
+    if (isMessageEvent(lastEvent)) {
+      messages.current.push(lastEvent.payload);
+      return;
+    }
   }, [lastMessage]);
+
+  const sendCommand = useCallback(
+    (command: string) => {
+      const event: CommandEvent = {
+        event: "command.requested",
+        payload: {
+          command,
+        },
+        timestamp: new Date().toISOString(),
+      };
+      sendMessage(JSON.stringify(event));
+    },
+    [sendMessage],
+  );
 
   return {
     readyState,
     sendCommand,
+    telemetry,
+    messages,
   };
 }

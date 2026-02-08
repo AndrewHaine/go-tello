@@ -42,11 +42,9 @@ func (b *Browser) ReceiveCommands() {
 			break
 		}
 
-		if cmdEvent.event == EventTypeCommand {
-			b.Hub.Commands <- cmdEvent.payload
+		if cmdEvent.Event == EventTypeCommand {
+			b.Hub.Commands <- []byte(cmdEvent.Payload.Command)
 		}
-
-		b.Hub.Commands <- msg
 	}
 }
 

@@ -16,20 +16,23 @@ const (
 )
 
 type Event struct {
-	event EventType
-	payload map[string]any
-	timestamp time.Time
+	Event EventType `json:"event"`
+	Payload map[string]any `json:"payload"`
+	Timestamp time.Time `json:"timestamp"`
 }
 
 type CommandEvent struct {
-	Event
-	payload map[string]struct{command string}
+	Event EventType `json:"event"`
+	Payload struct{
+		Command string `json:"command"`
+	} `json:"payload"`
+	Timestamp time.Time `json:"timestamp"`
 }
 
 func EventFromTelemetry(telemetry tello.Telemetry) Event {
 	return Event{
-		event: EventTypeTelemetry,
-		payload: map[string]any{
+		Event: EventTypeTelemetry,
+		Payload: map[string]any{
 			"battery": telemetry.Bat,
 			"pitch": telemetry.Pitch,
 			"roll": telemetry.Roll,
@@ -38,18 +41,18 @@ func EventFromTelemetry(telemetry tello.Telemetry) Event {
 			"temp_low": telemetry.Temp.Low,
 			"height": telemetry.Height,
 		},
-		timestamp: time.Now(),
+		Timestamp: time.Now(),
 	}
 }
 
 func EventFromTelloMsg(msg tello.Message) Event {
 	return Event{
-		event: EventTypeLog,
-		payload: map[string]any{
+		Event: EventTypeLog,
+		Payload: map[string]any{
 			"message": msg.Message,
 			"time": msg.Time,
 		},
-		timestamp: time.Now(),
+		Timestamp: time.Now(),
 	}
 }
 
@@ -61,10 +64,10 @@ func EventFromConnectionStatus(connected bool) Event {
 	}
 
 	return Event{
-		event: EventTypeConnection,
-		payload: map[string]any{
+		Event: EventTypeConnection,
+		Payload: map[string]any{
 			"connection_status": connectionStatus,
 		},
-		timestamp: time.Now(),
+		Timestamp: time.Now(),
 	}
 }
