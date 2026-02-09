@@ -1,26 +1,28 @@
 package web
 
 import (
-	"fmt"
+	"encoding/json"
 	"log"
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/pion/webrtc/v3"
 )
 
 type Browser struct {
 	Conn *websocket.Conn
 	Hub *Hub
+	VideoPeerConn *webrtc.PeerConnection
 	Queue chan Event
 }
 
 const (
 	pongWait = 60 * time.Second
 	pingPeriod = (pongWait * 9) / 10
-	maxMessageSize = 512
+	maxMessageSize = 12000
 )
 
-func (b *Browser) ReceiveCommands() {
+func (b *Browser) ReceiveMessages() {
 	defer func() {
 		b.Hub.Deregister <- b
 		b.Conn.Close()
@@ -28,22 +30,61 @@ func (b *Browser) ReceiveCommands() {
 
 	b.Conn.SetReadLimit(maxMessageSize)
 	b.Conn.SetReadDeadline(time.Now().Add(pongWait))
-	b.Conn.SetPongHandler(func(string) error { b.Conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
+	b.Conn.SetPongHandler(func(string) error { 
+		b.Conn.SetReadDeadline(time.Now().Add(pongWait))
+		return nil 
+	})
+	
+	peerConn, _ := webrtc.NewPeerConnection(webrtc.Configuration{})
+	b.VideoPeerConn = peerConn
+	b.VideoPeerConn.AddTrack(b.Hub.VideoTrack)
+
+	b.VideoPeerConn.OnICECandidate(func(candidate *webrtc.ICECandidate) {
+		if candidate != nil {
+			b.Conn.WriteJSON(map[string]any{
+				"event": "video.ice-candidate",
+				"payload": candidate.ToJSON(),
+			})
+		}
+	})
+
+	offer, _ := b.VideoPeerConn.CreateOffer(nil)
+	b.VideoPeerConn.SetLocalDescription(offer)
+
+	offerMsg := VideoPeerConnOfferEvent{
+		Event: EventTypeVideoPeerConnOffer,
+		Payload: offer,
+	}
+	b.Conn.WriteJSON(offerMsg)
 
 	for {
-		var cmdEvent CommandEvent
-		err := b.Conn.ReadJSON(&cmdEvent)
-
+		var event Event
+		err := b.Conn.ReadJSON(&event)
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				log.Printf("Error reading from browser: %v", err)
 			}
-			fmt.Println(err.Error())
 			break
 		}
 
-		if cmdEvent.Event == EventTypeCommand {
-			b.Hub.Commands <- []byte(cmdEvent.Payload.Command)
+		if event.Event == EventTypeCommand {
+			if cmd, ok := event.Payload["command"].(string); ok {
+				b.Hub.Commands <- []byte(cmd)
+			}
+		}
+
+		if event.Event == EventTypeVideoPeerConnAnswer {
+			var answer webrtc.SessionDescription
+			data, _ := json.Marshal(event.Payload)
+			json.Unmarshal(data, &answer)
+			b.VideoPeerConn.SetRemoteDescription(answer)
+		}
+
+		if event.Event == EventTypeVideoPeerConnIceCandidate {
+			var candidate webrtc.ICECandidateInit
+			data, _ := json.Marshal(event.Payload)
+			json.Unmarshal(data, &candidate)
+			b.VideoPeerConn.AddICECandidate(candidate)
 		}
 	}
 }

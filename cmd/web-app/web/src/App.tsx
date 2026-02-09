@@ -1,16 +1,18 @@
-// import { useEffect } from "react";
 import useDrone from "./hooks/use-drone";
-// import { ReadyState } from "react-use-websocket";
-import { Video } from "./components/Video";
 import { Keyboard } from "./components/Keyboard";
 import { Telemetry } from "./components/Telemetry";
 import { Messages } from "./components/Messages";
+import { useRef } from "react";
+import { Video } from "./components/Video";
 
 const BACKEND_HOST = "ws://localhost:8080/ws";
 
 function App() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
   const { sendCommand, telemetry, messages } = useDrone({
     webSocketHost: BACKEND_HOST,
+    videoRef,
   });
 
   return (
@@ -20,7 +22,7 @@ function App() {
           Go Tello Command Centre
         </h1>
         <div id="video" className="col-start-1 col-end-13 md:col-end-8">
-          <Video batteryLevel={telemetry.current?.battery} />
+          <Video batteryLevel={telemetry?.battery} ref={videoRef} />
         </div>
         <div
           id="keyboard"
@@ -29,8 +31,8 @@ function App() {
           <Keyboard onCommand={(command) => sendCommand(command)} />
         </div>
         <div className="flex flex-col col-start-1 md:col-start-8 col-end-13 row-start-2">
-          <Telemetry telemetry={telemetry.current} />
-          <Messages messages={messages.current} />
+          <Telemetry telemetry={telemetry} />
+          <Messages messages={messages} />
         </div>
       </div>
     </>

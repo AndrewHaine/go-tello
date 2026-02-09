@@ -1,5 +1,15 @@
 package web
 
+import (
+	"fmt"
+	"time"
+
+	"github.com/andrewhaine/go-tello/pkg/tello"
+	"github.com/pion/webrtc/v3"
+	"github.com/pion/webrtc/v3/pkg/media"
+	"github.com/pion/webrtc/v3/pkg/media/h264reader"
+)
+
 type Hub struct {
 	Browsers map[Browser]bool
 
@@ -10,6 +20,8 @@ type Hub struct {
 	Register chan *Browser
 
 	Deregister chan *Browser
+
+	VideoTrack webrtc.TrackLocal
 }
 
 func NewHub() Hub {
@@ -47,5 +59,30 @@ func (h *Hub) Listen() {
 				}
 			}
 		}
+	}
+}
+
+func (h *Hub) ListenVideo(drone *tello.Drone) {
+	videoTrack, _ := webrtc.NewTrackLocalStaticSample(
+		webrtc.RTPCodecCapability{MimeType: webrtc.MimeTypeH264},
+		"video",
+		"stream",
+	)
+
+	h.VideoTrack = videoTrack
+
+	videoConn, err := drone.StreamVideo()
+
+	if err != nil {
+		fmt.Println("Error listening to video stream " + err.Error())
+		return
+	}
+
+	h264Reader, _ := h264reader.NewReader(videoConn)
+	for {
+		nal, _ := h264Reader.NextNAL()
+		videoTrack.WriteSample(
+			media.Sample{Data: nal.Data, Duration: time.Millisecond * 33},
+		)
 	}
 }

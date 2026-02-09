@@ -55,7 +55,7 @@ const KEY_BINDINGS: Array<KeyBinding> = [
     label: "↑",
     keyCode: "ArrowUp",
     caption: "up",
-    command: "up 60 60",
+    command: "up 60",
     className: "col-start-2",
   },
   {

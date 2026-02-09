@@ -22,6 +22,8 @@ type Drone struct {
   telemetryStreaming bool
   telemetryConn *net.UDPConn
   telemetryConnState ConnectionState
+  streamingVideo bool
+  videoConn *net.UDPConn
 }
 
 func NewDrone() Drone {

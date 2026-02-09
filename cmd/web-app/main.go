@@ -33,6 +33,7 @@ func main() {
   
   hub := web.NewHub()
 	go hub.Listen()
+	go hub.ListenVideo(&drone)
 
 	go sendHubCommandsToDrone(&drone, &hub)
 	go broadcastTelemetry(&drone, &hub)
@@ -46,6 +47,10 @@ func main() {
 }
 
 func serveWs(hub *web.Hub, w http.ResponseWriter, r *http.Request) {
+	upgrader.CheckOrigin = func(r *http.Request) bool {
+		return true
+	}
+
 	ws, err := upgrader.Upgrade(w, r, nil)
 
 	if err != nil {
@@ -59,7 +64,7 @@ func serveWs(hub *web.Hub, w http.ResponseWriter, r *http.Request) {
 	hub.Register <- browser
 
 	go browser.SendQueuedMessages()
-	go browser.ReceiveCommands()
+	go browser.ReceiveMessages()
 }
 
 func sendHubCommandsToDrone(drone *tello.Drone, hub *web.Hub) {

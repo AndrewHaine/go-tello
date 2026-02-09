@@ -1,11 +1,13 @@
+import type { RefObject } from "react";
 import { CircleBtn } from "./CircleBtn";
 
 interface VideoProps {
   batteryLevel?: string;
+  ref?: RefObject<HTMLVideoElement | null>;
 }
 
 export const Video = (props: VideoProps) => {
-  const { batteryLevel } = props;
+  const { batteryLevel, ref } = props;
 
   return (
     <div className="relative aspect-5/3 overflow-hidden rounded-4xl">
@@ -48,14 +50,13 @@ export const Video = (props: VideoProps) => {
         />
         <video
           id="cam"
+          ref={ref}
           autoPlay
           className="w-full h-full object-cover top-0 left-0 row-start-1 col-start-1"
           loop
           playsInline
           muted
-        >
-          <source src="https://www.pexels.com/download/video/5579142/" />
-        </video>
+        ></video>
       </div>
     </div>
   );

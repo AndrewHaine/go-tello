@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/andrewhaine/go-tello/pkg/tello"
+	"github.com/pion/webrtc/v3"
 )
 
 type EventType string
@@ -13,6 +14,9 @@ const (
 	EventTypeCommand EventType = "command.requested"
 	EventTypeConnection EventType = "connection.updated"
 	EventTypeTelemetry EventType = "telemetry.updated"
+	EventTypeVideoPeerConnOffer EventType = "video.offer"
+	EventTypeVideoPeerConnAnswer EventType = "video.answer"
+	EventTypeVideoPeerConnIceCandidate EventType = "video.ice-candidate"
 )
 
 type Event struct {
@@ -27,6 +31,21 @@ type CommandEvent struct {
 		Command string `json:"command"`
 	} `json:"payload"`
 	Timestamp time.Time `json:"timestamp"`
+}
+
+type VideoPeerConnOfferEvent struct {
+	Event EventType `json:"event"`
+	Payload webrtc.SessionDescription `json:"payload"`
+}
+
+type VideoPeerConnAnswerEvent struct {
+	Event EventType `json:"event"`
+	Payload map[string]any `json:"payload"`
+}
+
+type VideoPeerConnIceCandidateEvent struct {
+	Event EventType `json:"event"`
+	Payload map[string]any `json:"payload"`
 }
 
 func EventFromTelemetry(telemetry tello.Telemetry) Event {
