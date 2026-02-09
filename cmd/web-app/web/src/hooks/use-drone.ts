@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import {
   useCallback,
   useEffect,
@@ -5,6 +6,7 @@ import {
   useState,
   type RefObject,
 } from "react";
+import { SCREENSHOTS_QUERY_KEY } from "../components/Screenshots";
 
 interface UseDroneCommandsOptions {
   webSocketHost: string;
@@ -18,7 +20,8 @@ type EventType =
   | "telemetry.updated"
   | "video.offer"
   | "video.answer"
-  | "video.ice-candidate";
+  | "video.ice-candidate"
+  | "screenshot.added";
 
 interface Event {
   event: EventType;
@@ -81,6 +84,7 @@ export default function useDrone(options: UseDroneCommandsOptions) {
   const [telemetry, setTelemetry] = useState<Telemetry | null>(null);
   const [messages, setMessages] = useState<Array<Message>>([]);
   const [readyState, setReadyState] = useState<number>(WebSocket.CONNECTING);
+  const queryClient = useQueryClient();
 
   const wsRef = useRef<WebSocket | null>(null);
   const videoPeerConnection = useRef<RTCPeerConnection | null>(null);
@@ -138,6 +142,12 @@ export default function useDrone(options: UseDroneCommandsOptions) {
       if (isVideoPeerConnectionIceCandidateEvent(parsedEvent)) {
         handleIceCandidate(parsedEvent);
       }
+
+      if (parsedEvent.event === "screenshot.added") {
+        queryClient.invalidateQueries({
+          queryKey: [SCREENSHOTS_QUERY_KEY],
+        });
+      }
     };
 
     const pc = new RTCPeerConnection();
@@ -163,6 +173,7 @@ export default function useDrone(options: UseDroneCommandsOptions) {
       ws.close();
       pc.close();
     };
+    // eslint-disable-next-line
   }, [webSocketHost, videoRef]);
 
   const sendCommand = useCallback((command: string) => {

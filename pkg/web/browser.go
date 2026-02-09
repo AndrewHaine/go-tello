@@ -37,7 +37,7 @@ func (b *Browser) ReceiveMessages() {
 	
 	peerConn, _ := webrtc.NewPeerConnection(webrtc.Configuration{})
 	b.VideoPeerConn = peerConn
-	b.VideoPeerConn.AddTrack(b.Hub.VideoTrack)
+	b.VideoPeerConn.AddTrack(b.Hub.VideoServer.VideoTrack)
 
 	b.VideoPeerConn.OnICECandidate(func(candidate *webrtc.ICECandidate) {
 		if candidate != nil {

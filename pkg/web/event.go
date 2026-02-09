@@ -17,6 +17,7 @@ const (
 	EventTypeVideoPeerConnOffer EventType = "video.offer"
 	EventTypeVideoPeerConnAnswer EventType = "video.answer"
 	EventTypeVideoPeerConnIceCandidate EventType = "video.ice-candidate"
+	EventTypeScreenshotAdded EventType = "screenshot.added"
 )
 
 type Event struct {
@@ -44,6 +45,11 @@ type VideoPeerConnAnswerEvent struct {
 }
 
 type VideoPeerConnIceCandidateEvent struct {
+	Event EventType `json:"event"`
+	Payload map[string]any `json:"payload"`
+}
+
+type ScreenshotAddedEvent struct {
 	Event EventType `json:"event"`
 	Payload map[string]any `json:"payload"`
 }
